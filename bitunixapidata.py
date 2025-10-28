@@ -3,14 +3,14 @@ import requests, time, colorama
 # --- CONFIG ---
 API_URL = "https://fapi.bitunix.com/api/v1/futures/market/tickers"
 PRICE_THRESHOLD = 2      # % price change
-VOLUME_THRESHOLD = 3    # % volume change
+VOLUME_THRESHOLD = 20    # % volume change
 CHECK_INTERVAL = 60      # seconds (1m)
 # ----------------
 
 def get_tickers():
-    r = requests.get(API_URL).json()
+    response = requests.get(API_URL).json()
     tickers = {}
-    for item in r.get("data", []):
+    for item in response.get("data", []):
         symbol = item["symbol"]
         price = float(item["lastPrice"])
         volume = float(item["quoteVol"])  # quoteVol is the traded volume in quote currency
@@ -38,7 +38,7 @@ while True:
 
         # Filter only significant changes
         if abs(price_change) >= PRICE_THRESHOLD or abs(vol_change) >= VOLUME_THRESHOLD:
-            print(f"{symbol}: Price change {price_change:.2f}%, Volume chagne {vol_change:.2f}%")
+            print(f"{symbol}: Price change {price_change:.2f}%, Volume change: {vol_change:.2f}%")
 
     baseline = now
     time.sleep(CHECK_INTERVAL)
