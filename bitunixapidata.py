@@ -7,6 +7,9 @@ VOLUME_THRESHOLD = 20    # % volume change
 CHECK_INTERVAL = 60      # seconds (1m)
 # ----------------
 
+
+
+# Gathers tickers from the API_URL and puts them into a list so they can be iterated on
 def get_tickers():
     response = requests.get(API_URL).json()
     tickers = {}
