@@ -1,4 +1,4 @@
-import requests, time, colorama
+import requests, time
 
 # --- CONFIG ---
 API_URL = "https://fapi.bitunix.com/api/v1/futures/market/tickers"
