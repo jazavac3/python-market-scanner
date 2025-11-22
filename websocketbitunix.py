@@ -3,6 +3,7 @@ import asyncio
 import time
 from collections import defaultdict, deque
 from typing import Deque, Dict, Tuple, Optional
+import os
 
 import aiohttp
 
@@ -16,6 +17,12 @@ HISTORY_SECONDS = 300        # keep 5 minutes of history
 
 # per-symbol history: deque of (ts_sec, price(float), volume(float))
 histories: Dict[str, Deque[Tuple[float, float, float]]] = defaultdict(lambda: deque())
+
+def clear():            # clears terminal (currently not in use)
+    if os.name == 'nt':
+        os.system('cls')
+    else:
+        os.system('clear')              # Not needed as my OS is likely going to stay Windows 
 
 # helper: safe float parse
 def to_float(x) -> float:
