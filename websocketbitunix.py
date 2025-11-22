@@ -155,12 +155,14 @@ async def main_loop():
 
             # print movers
             if movers:
+                # clear()
                 print(f"\n[{time.strftime('%H:%M:%S', time.localtime(ts))}] Movers: {len(movers)}")
                 for sym, p1, v1, p5, v5 in movers:
                     print(f"{sym:12}  1mP:{fmt_pct(p1):>8}  1mV:{fmt_pct(v1):>8}   5mP:{fmt_pct(p5):>8}  5mV:{fmt_pct(v5):>8}")
             else:
                 # lightweight heartbeat to show it's alive
                 print(f"[{time.strftime('%H:%M:%S', time.localtime(ts))}] No movers")
+                # clear()
 
             # sleep until next poll, accounting for time spent
             elapsed = time.time() - start
