@@ -1,4 +1,4 @@
-# bitunix_rest_scanner.py
+# Connects to the Bitunix REST API and listens for changes in price and volume on subscribed (all) pairs
 import asyncio
 import time
 from collections import defaultdict, deque
