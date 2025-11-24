@@ -1,4 +1,4 @@
-# bitunix_rest_scanner_clean.py
+# bitunix_rest_scanner.py
 import asyncio
 import time
 from collections import defaultdict, deque
@@ -12,17 +12,17 @@ REST_TICKERS = "https://fapi.bitunix.com/api/v1/futures/market/tickers"
 POLL_INTERVAL = 2.0          # seconds (2s)
 PRICE_THRESHOLD = 2.0        # percent for price change
 VOLUME_THRESHOLD = 20.0      # percent for volume change
-HISTORY_SECONDS = 300        # keep 5 minutes of history for 1m snapshot
+HISTORY_SECONDS = 300        # keep 5 minutes of history
 # ----------------------------
 
 # per-symbol history: deque of (ts_sec, price(float), volume(float))
 histories: Dict[str, Deque[Tuple[float, float, float]]] = defaultdict(lambda: deque())
 
-def clear():            # clears terminal (optional)
+def clear():            # clears terminal (currently not in use)
     if os.name == 'nt':
         os.system('cls')
     else:
-        os.system('clear')
+        os.system('clear')              # Not needed as my OS is likely going to stay Windows 
 
 # helper: safe float parse
 def to_float(x) -> float:
@@ -75,6 +75,7 @@ async def fetch_tickers(session: aiohttp.ClientSession) -> Dict[str, Tuple[float
         if not sym:
             continue
         price = to_float(item.get("lastPrice") or item.get("la") or 0.0)
+        # try quoteVol then baseVol
         vol = to_float(item.get("quoteVol") or item.get("q") or item.get("baseVol") or 0.0)
         out[sym] = (price, vol)
     return out
@@ -128,23 +129,40 @@ async def main_loop():
                     pchg1 = None
                     vchg1 = None
 
+                # 5-minute snapshot
+                snap5 = find_snapshot_at_or_before(h, ts - 300.0)
+                if snap5:
+                    _, old_price_5, old_vol_5 = snap5
+                    pchg5 = pct_change(price, old_price_5)
+                    vchg5 = pct_change(vol, old_vol_5)
+                else:
+                    pchg5 = None
+                    vchg5 = None
+
                 # decide mover
                 is_mover = False
                 if pchg1 is not None and (abs(pchg1) >= PRICE_THRESHOLD or pchg1 == float("inf")):
                     is_mover = True
                 if vchg1 is not None and (abs(vchg1) >= VOLUME_THRESHOLD or vchg1 == float("inf")):
                     is_mover = True
+                if pchg5 is not None and (abs(pchg5) >= PRICE_THRESHOLD or pchg5 == float("inf")):
+                    is_mover = True
+                if vchg5 is not None and (abs(vchg5) >= VOLUME_THRESHOLD or vchg5 == float("inf")):
+                    is_mover = True
 
                 if is_mover:
-                    movers.append((sym, pchg1, vchg1))
+                    movers.append((sym, pchg1, vchg1, pchg5, vchg5))
 
             # print movers
             if movers:
+                # clear()
                 print(f"\n[{time.strftime('%H:%M:%S', time.localtime(ts))}] Movers: {len(movers)}")
-                for sym, p1, v1 in movers:
-                    print(f"{sym:12}  1mP:{fmt_pct(p1):>8}  1mV:{fmt_pct(v1):>8}")
+                for sym, p1, v1, p5, v5 in movers:
+                    print(f"{sym:12}  1mP:{fmt_pct(p1):>8}  1mV:{fmt_pct(v1):>8}   5mP:{fmt_pct(p5):>8}  5mV:{fmt_pct(v5):>8}")
             else:
+                # lightweight heartbeat to show it's alive
                 print(f"[{time.strftime('%H:%M:%S', time.localtime(ts))}] No movers")
+                # clear()
 
             # sleep until next poll, accounting for time spent
             elapsed = time.time() - start
