@@ -11,7 +11,7 @@ import aiohttp
 REST_TICKERS = "https://fapi.bitunix.com/api/v1/futures/market/tickers"
 POLL_INTERVAL = 2.0          # seconds (2s)
 PRICE_THRESHOLD = 2.0        # percent for price change
-VOLUME_THRESHOLD = 20.0      # percent for volume change
+VOLUME_THRESHOLD = 15.0      # percent for volume change
 HISTORY_SECONDS = 300        # keep 5 minutes of history
 # ----------------------------
 
@@ -22,7 +22,7 @@ def clear():            # clears terminal (currently not in use)
     if os.name == 'nt':
         os.system('cls')
     else:
-        os.system('clear')              # Not needed as my OS is likely going to stay Windows 
+        os.system('clear')              # Not needed as my OS for Windows
 
 # helper: safe float parse
 def to_float(x) -> float:
