@@ -36,8 +36,8 @@ while True:
         if old_data["price"] == 0 or old_data["volume"] == 0:
             continue
 
-        price_change = ((new_data["price"] - old_data["price"]) / old_data["price"]) * 100
-        vol_change = ((new_data["volume"] - old_data["volume"]) / old_data["volume"]) * 100
+        price_change = ((new_data["price"] - old_data["price"]) / old_data["price"]) * 100  # % price change formula
+        vol_change = ((new_data["volume"] - old_data["volume"]) / old_data["volume"]) * 100  # % volume change formula
 
         # Filter only significant changes
         if abs(price_change) >= PRICE_THRESHOLD or abs(vol_change) >= VOLUME_THRESHOLD:
